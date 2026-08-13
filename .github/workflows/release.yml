@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          cat > /tmp/notes.md <<EOF
+          Official \`tonia-sdk\` Agent Skill.
+
+              gh skill install tonia-router/skills tonia-sdk
+
+          Aligns with \`@tonia/sdk\` / \`tonia\` 0.2.1. Apache 2.0, copyright 2026 tonia inc.
+          EOF
+          gh release create "$TAG" --title "$TAG" --notes-file /tmp/notes.md
