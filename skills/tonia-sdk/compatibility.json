@@ -7,19 +7,19 @@
     "node": ">=22"
   },
   "packages": {
-    "@tonia/sdk": {
+    "@tonia-router/sdk": {
       "version": "0.2.1",
-      "status": "local-staging",
+      "status": "unpublished",
       "tested": true
     },
     "tonia": {
       "version": "0.2.1",
-      "status": "local-staging",
+      "status": "unpublished",
       "tested": true
     },
     "tonia-sdk": {
       "version": null,
-      "status": "not-yet",
+      "status": "planned",
       "tested": false
     }
   }

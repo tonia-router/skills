@@ -5,10 +5,10 @@ Two different jobs. Do not mix them.
 | Job | What to install | Credential |
 | --- | --- | --- |
 | Point Cursor / Claude Code / Codex at tonia | Nothing extra — base URL + `tonia_sk_…` | Same key from [setup](setup.md) |
-| Call tonia from **your** app | `@tonia/sdk` or `tonia` | `TONIA_API_KEY` |
+| Call tonia from **your** app | `@tonia-router/sdk` or `tonia` | `TONIA_API_KEY` |
 
 The official SDK is for application code. Cursor’s OpenAI override, Claude
-Code, and Codex talk HTTP themselves — do not add `@tonia/sdk` to those
+Code, and Codex talk HTTP themselves — do not add `@tonia-router/sdk` to those
 tools.
 
 Production address: `https://pass.tonia.ca:8443`. Override only for an
@@ -27,7 +27,9 @@ Settings → Models:
    `https://pass.tonia.ca:8443/v1`.
 
 Cursor is OpenAI-shaped (`Authorization: Bearer`). Repeat for each model id
-the profile allows.
+the profile allows. Those ids are OpenAI-shaped (`anthropic/claude-…`).
+Claude Code lists with `x-api-key` and sees Anthropic-shaped ids (`claude-…`,
+no prefix). Do not paste one style into the other tool.
 
 ## Claude Code (CLI)
 

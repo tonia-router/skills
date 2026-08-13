@@ -6,19 +6,19 @@ Need a key first? [Portal key setup](setup.md). Pointing Cursor at tonia?
 Read [`compatibility.json`](compatibility.json) before installing.
 
 ```bash
-# status: local-staging — editable install from the sibling tree
+# packages are not on PyPI yet — editable install from the sibling tree
 pip install -e ../python-sdk
 # or: pip install -e /path/to/tonia-router/python-sdk
 
-# status: published (not yet) — then: pip install tonia
+# once published: pip install tonia
 ```
 
 Needs Python 3.11 or newer (3.12–3.14 are current). Python 3.10 reaches
 end of support in October 2026 — do not target it.
 
-The client import is `from tonia import Tonia`. In the tonia monorepo, Pass
-API is a different Python package also named `tonia` — install this SDK
-from `tonia-router/python-sdk` so `import tonia` is the client.
+The client import is `from tonia import Tonia`. The Pass server also ships a
+Python package named `tonia` — install this SDK from
+`tonia-router/python-sdk` so `import tonia` is the client.
 
 ```python
 import os
@@ -36,7 +36,10 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
     listed = client.models.list()
     ids = [model["id"] for model in listed["data"]]
     if not ids:
-        raise RuntimeError("empty allowlist — do not guess a model id")
+        raise RuntimeError("this key has no models; check the profile allowlist in the portal")
+
+    # models.list() is Bearer / OpenAI-shaped (anthropic/claude-…).
+    # messages.create sends x-api-key but still takes that same id.
 
     def pick(test):
         return next((model_id for model_id in ids if test(model_id)), None)

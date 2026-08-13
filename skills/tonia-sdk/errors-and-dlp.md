@@ -10,7 +10,7 @@ Most runtime errors use:
 {"error": {"type": "...", "code": "...", "retryable": false}}
 ```
 
-Raise a typed exception per `type`. The SDK does not auto-retry. Honor
+Raise a typed exception per `type`. The SDK does not auto-retry. Follow
 `retryable` and `Retry-After` (seconds) when present. Public model 404
 uses a flat `{"error": "not_found"}` body.
 
@@ -55,7 +55,7 @@ Header: `Retry-After: <seconds>`. Official SDKs expose this as
 Per-key RPM defaults to 600. In-flight concurrency is a separate limit
 from RPM. A streaming call holds a slot until the stream ends.
 
-### Do not mix these 429 / 402 / 503 families
+### 429 / 402 / 503 families
 
 | HTTP (hard-error mode) | `type` | `code` | SDK class | `retryable` | `Retry-After` |
 | --- | --- | --- | --- | --- | --- |

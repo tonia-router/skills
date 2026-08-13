@@ -1,4 +1,4 @@
-# TypeScript — `@tonia/sdk`
+# TypeScript — `@tonia-router/sdk`
 
 Need a key first? [Portal key setup](setup.md). Pointing Cursor at tonia?
 [Coding tools](tools.md).
@@ -6,12 +6,12 @@ Need a key first? [Portal key setup](setup.md). Pointing Cursor at tonia?
 Read [`compatibility.json`](compatibility.json) before installing.
 
 ```bash
-# status: local-staging — build the sibling tree, then depend on it
+# packages are not on npm yet — build the sibling tree, then depend on it
 #   cd ../typescript-sdk && npm install && npm run build
 npm add ../typescript-sdk
 # or: npm add /path/to/tonia-router/typescript-sdk
 
-# status: published (not yet) — then: npm add @tonia/sdk
+# once published: npm add @tonia-router/sdk
 ```
 
 Needs Node.js 22 or newer. Node 18 and 20 are end-of-life — do not
@@ -23,7 +23,7 @@ import {
   PolicyBlockError,
   RateLimitError,
   Tonia,
-} from "@tonia/sdk";
+} from "@tonia-router/sdk";
 
 const client = new Tonia({
   apiKey: process.env.TONIA_API_KEY!,
@@ -45,8 +45,10 @@ if (publicModels.data[0]) {
 const { data } = await client.models.list();
 const ids = data.map((model) => model.id);
 if (!ids[0]) {
-  throw new Error("empty allowlist — do not guess a model id");
+  throw new Error("this key has no models; check the profile allowlist in the portal");
 }
+// models.list() is Bearer / OpenAI-shaped (anthropic/claude-…).
+// messages.create sends x-api-key but still takes that same id.
 const pick = (test: (id: string) => boolean) => ids.find(test);
 
 await client.models.get(ids[0]);

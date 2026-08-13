@@ -32,9 +32,14 @@ Use a placeholder in committed files (`.env.example`: `TONIA_API_KEY=tonia_sk_�
 
 After the env var is set, `client.models.list()` is the allowlist for this
 key: Workspace roster ∩ profile `model_allowlist` / `provider_allowlist`.
-Empty list → empty allowlist or missing BYOK — do not guess a model id.
+Empty list → empty allowlist or missing BYOK. Stop and check the portal.
 Public `client.publicModels.list()` / `client.public_models.list()` is the
 Managed sell catalogue, not what this key may call.
+
+`models.list()` sends Bearer and returns OpenAI-shaped ids
+(`anthropic/claude-…`). Listing the same path with `x-api-key` only
+(Anthropic SDKs, Claude Code) returns unprefixed Anthropic-shaped ids.
+Do not mix the two.
 
 ## Next
 
