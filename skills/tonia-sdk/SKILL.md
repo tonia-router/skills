@@ -45,7 +45,7 @@ code. Stay on the public SDK surface.
 4. Call `client.models.list()` before picking a model — that list is what
    this key may call (bound profile, resolved live). Empty list → stop.
    Do not hardcode a SKU the list does not contain. Skip a helper when no
-   listed id matches that surface (chat, embeddings, Path A image, Gemini
+   listed id matches that surface (chat, embeddings, `/v1/images`, Gemini
    image, …).
 5. Use `.stream()` for SSE. Do not buffer the stream. The SDK already raises
    `PolicyBlockError` / `EntitlementError` on HTTP 200 carriers — catch the

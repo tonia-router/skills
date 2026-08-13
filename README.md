@@ -38,5 +38,5 @@ skills/
         └── compatibility.json
 ```
 
-Copyright 2026 tonia. Apache 2.0 — commercial use allowed. Keep `NOTICE`
+Copyright (c) 2026 tonia inc.. Apache 2.0 — commercial use allowed. Keep `NOTICE`
 if you copy this skill.

@@ -73,14 +73,14 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
     if rerank:
         client.rerank.create(model=rerank, query="q", documents=["a"])
 
-    path_a_image = pick(
+    image_sku = pick(
         lambda model_id: model_id.startswith(("openai/", "xai/", "stepfun/"))
         and "image" in model_id.lower()
     )
-    if path_a_image:
-        # Path A — 300s unless timeout= is set on Tonia(...)
+    if image_sku:
+        # images.generate — 300s unless timeout= is set on Tonia(...)
         client.images.generate(
-            model=path_a_image,
+            model=image_sku,
             prompt="Draw a red fox",
             n=1,
         )

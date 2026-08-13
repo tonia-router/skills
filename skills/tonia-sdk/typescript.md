@@ -85,13 +85,13 @@ if (rerank) {
   await client.rerank.create({ model: rerank, query: "q", documents: ["a"] });
 }
 
-const pathAImage = pick(
+const imageSku = pick(
   (id) => /^(openai|xai|stepfun)\//.test(id) && /image/i.test(id),
 );
-if (pathAImage) {
-  // Path A — 300s abort unless timeout is set on Tonia
+if (imageSku) {
+  // images.generate — 300s abort unless timeout is set on Tonia
   await client.images.generate({
-    model: pathAImage,
+    model: imageSku,
     prompt: "Draw a red fox",
     n: 1,
   });

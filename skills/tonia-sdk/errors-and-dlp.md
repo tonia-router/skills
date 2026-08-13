@@ -1,7 +1,6 @@
 # Errors, streaming, and DLP
 
-See also [`tonia-api`](https://github.com/tonia-router/tonia-api)
-(`public.openapi.yaml`).
+See also [`tonia-api`](https://github.com/tonia-router/tonia-api).
 
 ## Hard errors
 
@@ -137,11 +136,11 @@ ask Pass to fetch private/internal URLs.
 
 ## Gemini image routing
 
-`client.images.generate` / `client.images.edit` are Path A (`/v1/images/*`)
+`client.images.generate` / `client.images.edit` call `/v1/images/*`
 for openai, xAI, and StepFun. Gemini image SKUs must use
 `client.interactions.create` (`POST /v1/interactions`).
 
-A Gemini SKU on Path A returns:
+A Gemini SKU on `/v1/images/*` returns:
 
 ```json
 {
