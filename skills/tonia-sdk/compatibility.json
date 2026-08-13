@@ -1,7 +1,7 @@
 {
   "skill": "tonia-sdk",
   "skill_revision": "0.2.1",
-  "openapi_revision": "0.1.0",
+  "openapi_revision": "0.2.1",
   "runtimes": {
     "python": ">=3.11",
     "node": ">=22"
