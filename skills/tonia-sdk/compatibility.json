@@ -1,15 +1,19 @@
 {
   "skill": "tonia-sdk",
-  "skill_revision": "0.1.0-local",
+  "skill_revision": "0.2.1",
   "openapi_revision": "0.1.0",
+  "runtimes": {
+    "python": ">=3.11",
+    "node": ">=22"
+  },
   "packages": {
     "@tonia/sdk": {
-      "version": "0.1.0",
+      "version": "0.2.1",
       "status": "local-staging",
       "tested": true
     },
     "tonia": {
-      "version": "0.1.0",
+      "version": "0.2.1",
       "status": "local-staging",
       "tested": true
     },

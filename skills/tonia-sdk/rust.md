@@ -1,9 +1,7 @@
 # Rust — `tonia-sdk`
 
-```toml
-# Cargo.toml
-tonia-sdk = "0.1"
-```
+The Rust crate is **not shipped**. Do not add `tonia-sdk` to `Cargo.toml`.
+See [`compatibility.json`](compatibility.json) (`status: not-yet`).
 
-Confirm APIs against the published crate docs and the
-[`tonia-api`](https://github.com/tonia-router/tonia-api) OpenAPI reference.
+Use [TypeScript](typescript.md) or [Python](python.md) until Wave 2. The
+same [portal key](setup.md) and [coding tools](tools.md) steps apply.
