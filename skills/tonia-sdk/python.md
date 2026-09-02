@@ -77,15 +77,21 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
         client.rerank.create(model=rerank, query="q", documents=["a"])
 
     image_sku = pick(
-        lambda model_id: model_id.startswith(("openai/", "xai/", "stepfun/"))
-        and "image" in model_id.lower()
+        lambda model_id: "turbo" not in model_id.lower()
+        and not model_id.startswith(("gemini/", "gemini-"))
+        and (
+            model_id.startswith(("openai/", "xai/"))
+            or model_id.lower().startswith(("gpt-image", "grok-imagine-image", "muse-image"))
+        )
     )
     if image_sku:
         # images.generate — 300s unless timeout= is set on Tonia(...)
+        # Tenant dial (`1k`/`2k`/`4k`) or OpenAI size. Do not send resolution.
         client.images.generate(
             model=image_sku,
             prompt="Draw a red fox",
             n=1,
+            size="2k",
         )
 
     gemini_image = pick(
@@ -96,6 +102,47 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
         client.interactions.create(
             model=gemini_image,
             input="Draw a red fox",
+            stream=False,
+        )
+
+    tts = pick(
+        lambda model_id: (
+            "tts" in model_id.lower()
+            and "realtime" not in model_id.lower()
+            and "gemini" not in model_id.lower()
+        )
+    )
+    if tts:
+        client.audio.speech.create(model=tts, input="Bonjour", voice="alloy")
+
+    stt = pick(
+        lambda model_id: (
+            (
+                "transcribe" in model_id.lower()
+                or "whisper" in model_id.lower()
+                or "asr" in model_id.lower()
+            )
+            and "tts" not in model_id.lower()
+            and "realtime" not in model_id.lower()
+            and "gemini" not in model_id.lower()
+        )
+    )
+    if stt:
+        client.audio.transcriptions.create(
+            model=stt,
+            file=open("clip.wav", "rb").read(),
+            filename="clip.wav",
+        )
+
+    gemini_token_audio = pick(
+        lambda model_id: model_id.startswith("gemini/")
+        and ("tts" in model_id.lower() or "transcribe" in model_id.lower())
+    )
+    if gemini_token_audio:
+        # Gemini token TTS/STT — never audio.speech / audio.transcriptions
+        client.interactions.create(
+            model=gemini_token_audio,
+            input="Bonjour",
             stream=False,
         )
 

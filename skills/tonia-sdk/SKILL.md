@@ -45,8 +45,9 @@ code. Stay on the public SDK surface.
 4. Call `client.models.list()` before picking a model — that list is what
    this key may call (bound profile, resolved live). Empty list → stop.
    Do not hardcode a SKU the list does not contain. Skip a helper when no
-   listed id matches that surface (chat, embeddings, `/v1/images`, Gemini
-   image, …). `models.list()` is Bearer / OpenAI-shaped (`anthropic/claude-…`).
+   listed id matches that surface (chat, embeddings, `/v1/images`,
+   `audio.speech`, `audio.transcriptions`, Gemini image, …). `models.list()` is Bearer /
+   OpenAI-shaped (`anthropic/claude-…`).
    Anthropic clients listing with `x-api-key` see unprefixed ids (`claude-…`).
    Do not mix the two styles.
 5. Use `.stream()` for SSE. Do not buffer the stream. The SDK already raises

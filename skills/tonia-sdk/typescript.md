@@ -18,6 +18,7 @@ Needs Node.js 22 or newer. Node 18 and 20 are end-of-life — do not
 target them. Active LTS is 24. Build tooling uses TypeScript 6.0.
 
 ```ts
+import { readFile } from "node:fs/promises";
 import {
   EntitlementError,
   PolicyBlockError,
@@ -87,15 +88,25 @@ if (rerank) {
   await client.rerank.create({ model: rerank, query: "q", documents: ["a"] });
 }
 
-const imageSku = pick(
-  (id) => /^(openai|xai|stepfun)\//.test(id) && /image/i.test(id),
-);
+const imageSku = pick((id) => {
+  if (/turbo/i.test(id) || id.startsWith("gemini/") || id.startsWith("gemini-")) {
+    return false;
+  }
+  return (
+    /^(openai|xai)\//.test(id) ||
+    /^gpt-image/i.test(id) ||
+    /^grok-imagine-image/i.test(id) ||
+    /^muse-image/i.test(id)
+  );
+});
 if (imageSku) {
   // images.generate — 300s abort unless timeout is set on Tonia
+  // Tenant dial (`1k`/`2k`/`4k`) or OpenAI size. Do not send resolution.
   await client.images.generate({
     model: imageSku,
     prompt: "Draw a red fox",
     n: 1,
+    size: "2k",
   });
 }
 
@@ -105,6 +116,40 @@ if (geminiImage) {
   await client.interactions.create({
     model: geminiImage,
     input: "Draw a red fox",
+    stream: false,
+  });
+}
+
+const tts = pick(
+  (id) => /tts/i.test(id) && !/realtime/i.test(id) && !/gemini/i.test(id),
+);
+if (tts) {
+  await client.audio.speech.create({ model: tts, input: "Bonjour", voice: "alloy" });
+}
+
+const stt = pick(
+  (id) =>
+    (/transcribe/i.test(id) || /whisper/i.test(id) || /asr/i.test(id)) &&
+    !/tts/i.test(id) &&
+    !/realtime/i.test(id) &&
+    !/gemini/i.test(id),
+);
+if (stt) {
+  await client.audio.transcriptions.create({
+    model: stt,
+    file: await readFile("clip.wav"),
+    filename: "clip.wav",
+  });
+}
+
+const geminiTokenAudio = pick(
+  (id) => id.startsWith("gemini/") && (/tts/i.test(id) || /transcribe/i.test(id)),
+);
+if (geminiTokenAudio) {
+  // Gemini token TTS/STT — never audio.speech / audio.transcriptions
+  await client.interactions.create({
+    model: geminiTokenAudio,
+    input: "Bonjour",
     stream: false,
   });
 }

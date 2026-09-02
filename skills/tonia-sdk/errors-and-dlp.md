@@ -61,6 +61,9 @@ from RPM. A streaming call holds a slot until the stream ends.
 | --- | --- | --- | --- | --- | --- |
 | 429 | `rate_limit_error` | `admission_rate_limited` | `RateLimitError` | true | seconds (RPM: remaining window; concurrency: typically 1) |
 | 429 | `entitlement_error` | `request_quota_exhausted` | `EntitlementError` | true | seconds until monthly reset |
+| 429 | `entitlement_error` | `campaign_token_quota_exhausted` | `EntitlementError` | true | seconds until day/ISO-week reset |
+| 400 | `entitlement_error` | `campaign_token_per_request_exceeded` | `EntitlementError` | false | none — lower request size |
+| 503 | `entitlement_error` | `campaign_cogs_ceiling_exhausted` | `EntitlementError` | false | none — model no longer included |
 | 402 | `entitlement_error` | `*_budget_exhausted` | `EntitlementError` | false | none — do not retry |
 | 503 | `api_error` | `audit_tip_contention` | `ApiError` | true | 1 |
 | 503 | `managed_credential_unavailable` | `managed_credential_unavailable` | `ManagedCredentialUnavailableError` | true | 60 |

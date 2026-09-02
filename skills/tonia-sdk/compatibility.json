@@ -1,19 +1,19 @@
 {
   "skill": "tonia-sdk",
-  "skill_revision": "0.2.1",
-  "openapi_revision": "0.2.1",
+  "skill_revision": "0.3.0",
+  "openapi_revision": "0.3.0",
   "runtimes": {
     "python": ">=3.11",
     "node": ">=22"
   },
   "packages": {
     "@tonia-router/sdk": {
-      "version": "0.2.1",
+      "version": "0.3.0",
       "status": "unpublished",
       "tested": true
     },
     "tonia": {
-      "version": "0.2.1",
+      "version": "0.3.0",
       "status": "unpublished",
       "tested": true
     },
