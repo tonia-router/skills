@@ -50,7 +50,10 @@ if (!ids[0]) {
 }
 // models.list() is Bearer / OpenAI-shaped (anthropic/claude-…).
 // messages.create sends x-api-key but still takes that same id.
-const pick = (test: (id: string) => boolean) => ids.find(test);
+const caps = (model: (typeof data)[number]) => model.capabilities ?? [];
+const surfaceOf = (model: (typeof data)[number]) => model.surface ?? {};
+const pick = (test: (model: (typeof data)[number]) => boolean) =>
+  data.find(test)?.id;
 
 await client.models.get(ids[0]);
 
@@ -68,7 +71,7 @@ for await (const event of client.chat.completions.stream({
 
 await client.responses.create({ model: ids[0], input: "Bonjour" });
 
-const anthropic = pick((id) => id.startsWith("anthropic/"));
+const anthropic = pick((model) => model.id.startsWith("anthropic/"));
 if (anthropic) {
   // sends x-api-key automatically
   await client.messages.create({
@@ -78,25 +81,23 @@ if (anthropic) {
   });
 }
 
-const embedding = pick((id) => id.includes("embedding"));
+const embedding = pick((model) => model.id.includes("embedding"));
 if (embedding) {
   await client.embeddings.create({ model: embedding, input: "Bonjour" });
 }
 
-const rerank = pick((id) => id.includes("rerank"));
+const rerank = pick((model) => model.id.includes("rerank"));
 if (rerank) {
   await client.rerank.create({ model: rerank, query: "q", documents: ["a"] });
 }
 
-const imageSku = pick((id) => {
-  if (/turbo/i.test(id) || id.startsWith("gemini/") || id.startsWith("gemini-")) {
-    return false;
-  }
+const imageSku = pick((model) => {
+  if (/turbo/i.test(model.id)) return false;
   return (
-    /^(openai|xai)\//.test(id) ||
-    /^gpt-image/i.test(id) ||
-    /^grok-imagine-image/i.test(id) ||
-    /^muse-image/i.test(id)
+    surfaceOf(model).path === "/v1/images/generations" ||
+    (caps(model).includes("image_generation") &&
+      !model.id.startsWith("gemini/") &&
+      !model.id.startsWith("gemini-"))
   );
 });
 if (imageSku) {
@@ -110,7 +111,12 @@ if (imageSku) {
   });
 }
 
-const geminiImage = pick((id) => id.startsWith("gemini/") && /image/i.test(id));
+const geminiImage = pick(
+  (model) =>
+    (surfaceOf(model).family === "image" &&
+      surfaceOf(model).path === "/v1/interactions") ||
+    (model.id.startsWith("gemini/") && /image/i.test(model.id)),
+);
 if (geminiImage) {
   // Gemini image SKUs — /v1/interactions (not images.generate)
   await client.interactions.create({
@@ -121,18 +127,23 @@ if (geminiImage) {
 }
 
 const tts = pick(
-  (id) => /tts/i.test(id) && !/realtime/i.test(id) && !/gemini/i.test(id),
+  (model) =>
+    (surfaceOf(model).path === "/v1/audio/speech" ||
+      caps(model).includes("audio_speech")) &&
+    !model.id.startsWith("gemini/") &&
+    !/realtime/i.test(model.id),
 );
 if (tts) {
-  await client.audio.speech.create({ model: tts, input: "Bonjour", voice: "alloy" });
+  const voice = tts.startsWith("fish_") || tts.includes("s2.1-pro") ? "" : "alloy";
+  await client.audio.speech.create({ model: tts, input: "Bonjour", voice });
 }
 
 const stt = pick(
-  (id) =>
-    (/transcribe/i.test(id) || /whisper/i.test(id) || /asr/i.test(id)) &&
-    !/tts/i.test(id) &&
-    !/realtime/i.test(id) &&
-    !/gemini/i.test(id),
+  (model) =>
+    (surfaceOf(model).path === "/v1/audio/transcriptions" ||
+      caps(model).includes("audio_transcription")) &&
+    !model.id.startsWith("gemini/") &&
+    !/realtime/i.test(model.id),
 );
 if (stt) {
   await client.audio.transcriptions.create({
@@ -143,7 +154,10 @@ if (stt) {
 }
 
 const geminiTokenAudio = pick(
-  (id) => id.startsWith("gemini/") && (/tts/i.test(id) || /transcribe/i.test(id)),
+  (model) =>
+    model.id.startsWith("gemini/") &&
+    (surfaceOf(model).family === "speech" ||
+      surfaceOf(model).family === "transcription"),
 );
 if (geminiTokenAudio) {
   // Gemini token TTS/STT — never audio.speech / audio.transcriptions

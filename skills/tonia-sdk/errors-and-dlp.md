@@ -140,7 +140,8 @@ ask Pass to fetch private/internal URLs.
 ## Gemini image routing
 
 `client.images.generate` / `client.images.edit` call `/v1/images/*`
-for openai, xAI, and StepFun. Gemini image SKUs must use
+for openai, xAI, and Meta. Alibaba is generate-only
+(`images.generate`). Gemini image SKUs must use
 `client.interactions.create` (`POST /v1/interactions`).
 
 A Gemini SKU on `/v1/images/*` returns:

@@ -34,15 +34,24 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
         client.public_models.get(public_ids[0])
 
     listed = client.models.list()
-    ids = [model["id"] for model in listed["data"]]
+    rows = listed["data"]
+    ids = [model["id"] for model in rows]
     if not ids:
         raise RuntimeError("this key has no models; check the profile allowlist in the portal")
 
     # models.list() is Bearer / OpenAI-shaped (anthropic/claude-…).
     # messages.create sends x-api-key but still takes that same id.
 
+    def caps(model):
+        raw = model.get("capabilities")
+        return [str(cap) for cap in raw] if isinstance(raw, list) else []
+
+    def surface_of(model):
+        raw = model.get("surface")
+        return raw if isinstance(raw, dict) else {}
+
     def pick(test):
-        return next((model_id for model_id in ids if test(model_id)), None)
+        return next((model["id"] for model in rows if test(model)), None)
 
     client.models.get(ids[0])
 
@@ -59,7 +68,7 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
 
     client.responses.create(model=ids[0], input="Bonjour")
 
-    anthropic = pick(lambda model_id: model_id.startswith("anthropic/"))
+    anthropic = pick(lambda model: str(model["id"]).startswith("anthropic/"))
     if anthropic:
         # sends x-api-key automatically
         client.messages.create(
@@ -68,20 +77,22 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
             messages=[{"role": "user", "content": "Bonjour"}],
         )
 
-    embedding = pick(lambda model_id: "embedding" in model_id)
+    embedding = pick(lambda model: "embedding" in str(model["id"]))
     if embedding:
         client.embeddings.create(model=embedding, input="Bonjour")
 
-    rerank = pick(lambda model_id: "rerank" in model_id)
+    rerank = pick(lambda model: "rerank" in str(model["id"]))
     if rerank:
         client.rerank.create(model=rerank, query="q", documents=["a"])
 
     image_sku = pick(
-        lambda model_id: "turbo" not in model_id.lower()
-        and not model_id.startswith(("gemini/", "gemini-"))
+        lambda model: "turbo" not in str(model["id"]).lower()
         and (
-            model_id.startswith(("openai/", "xai/"))
-            or model_id.lower().startswith(("gpt-image", "grok-imagine-image", "muse-image"))
+            surface_of(model).get("path") == "/v1/images/generations"
+            or (
+                "image_generation" in caps(model)
+                and not str(model["id"]).startswith(("gemini/", "gemini-"))
+            )
         )
     )
     if image_sku:
@@ -95,7 +106,12 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
         )
 
     gemini_image = pick(
-        lambda model_id: model_id.startswith("gemini/") and "image" in model_id.lower()
+        lambda model: surface_of(model).get("family") == "image"
+        and surface_of(model).get("path") == "/v1/interactions"
+        or (
+            str(model["id"]).startswith("gemini/")
+            and "image" in str(model["id"]).lower()
+        )
     )
     if gemini_image:
         # Gemini image SKUs — /v1/interactions (not images.generate)
@@ -106,26 +122,24 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
         )
 
     tts = pick(
-        lambda model_id: (
-            "tts" in model_id.lower()
-            and "realtime" not in model_id.lower()
-            and "gemini" not in model_id.lower()
+        lambda model: (
+            surface_of(model).get("path") == "/v1/audio/speech"
+            or "audio_speech" in caps(model)
         )
+        and not str(model["id"]).startswith("gemini/")
+        and "realtime" not in str(model["id"]).lower()
     )
     if tts:
-        client.audio.speech.create(model=tts, input="Bonjour", voice="alloy")
+        speech_voice = "" if str(tts).startswith("fish_") or "s2.1-pro" in str(tts) else "alloy"
+        client.audio.speech.create(model=tts, input="Bonjour", voice=speech_voice)
 
     stt = pick(
-        lambda model_id: (
-            (
-                "transcribe" in model_id.lower()
-                or "whisper" in model_id.lower()
-                or "asr" in model_id.lower()
-            )
-            and "tts" not in model_id.lower()
-            and "realtime" not in model_id.lower()
-            and "gemini" not in model_id.lower()
+        lambda model: (
+            surface_of(model).get("path") == "/v1/audio/transcriptions"
+            or "audio_transcription" in caps(model)
         )
+        and not str(model["id"]).startswith("gemini/")
+        and "realtime" not in str(model["id"]).lower()
     )
     if stt:
         client.audio.transcriptions.create(
@@ -135,8 +149,8 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
         )
 
     gemini_token_audio = pick(
-        lambda model_id: model_id.startswith("gemini/")
-        and ("tts" in model_id.lower() or "transcribe" in model_id.lower())
+        lambda model: str(model["id"]).startswith("gemini/")
+        and surface_of(model).get("family") in ("speech", "transcription")
     )
     if gemini_token_audio:
         # Gemini token TTS/STT — never audio.speech / audio.transcriptions
