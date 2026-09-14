@@ -20,6 +20,7 @@ target them. Active LTS is 24. Build tooling uses TypeScript 6.0.
 ```ts
 import { readFile } from "node:fs/promises";
 import {
+  AgentBlockError,
   EntitlementError,
   PolicyBlockError,
   RateLimitError,
@@ -81,13 +82,25 @@ if (anthropic) {
   });
 }
 
-const embedding = pick((model) => model.id.includes("embedding"));
+const embedding = pick((model) => {
+  if (surfaceOf(model).family === "embeddings") return true;
+  if (caps(model).includes("embeddings")) return true;
+  const id = model.id.toLowerCase();
+  return id.includes("embed") && !id.includes("rerank");
+});
 if (embedding) {
+  // Tenant /v1/embeddings — send model + input. Not /v2/embed.
   await client.embeddings.create({ model: embedding, input: "Bonjour" });
 }
 
-const rerank = pick((model) => model.id.includes("rerank"));
+const rerank = pick(
+  (model) =>
+    surfaceOf(model).family === "rerank" ||
+    caps(model).includes("rerank") ||
+    model.id.toLowerCase().includes("rerank"),
+);
 if (rerank) {
+  // Tenant /v1/rerank — query + documents. Not a web search.
   await client.rerank.create({ model: rerank, query: "q", documents: ["a"] });
 }
 
@@ -103,11 +116,13 @@ const imageSku = pick((model) => {
 if (imageSku) {
   // images.generate — 300s abort unless timeout is set on Tonia
   // Tenant dial (`1k`/`2k`/`4k`) or OpenAI size. Do not send resolution.
+  // Image 2 maps 2k to 1536x1024. Image 2.5 2k is 2048x2048.
   await client.images.generate({
     model: imageSku,
     prompt: "Draw a red fox",
     n: 1,
     size: "2k",
+    ...( /gpt-image-2\.5/i.test(imageSku) ? { quality: "auto" as const } : {}),
   });
 }
 
@@ -176,6 +191,8 @@ try {
 } catch (err) {
   if (err instanceof PolicyBlockError) {
     // Bind a redact-mode profile in the portal, then retry. Do not set a header.
+  } else if (err instanceof AgentBlockError) {
+    // Open Policies → profile → Advanced — Agent controls.
   } else if (err instanceof RateLimitError && err.retryable) {
     // wait err.retryAfterSeconds, then retry once
   } else if (err instanceof EntitlementError) {
@@ -183,6 +200,36 @@ try {
   } else {
     throw err;
   }
+}
+
+const live = pick(
+  (model) =>
+    model.id === "gpt-live-1" ||
+    model.id === "openai/gpt-live-1" ||
+    caps(model).includes("realtime"),
+);
+if (live) {
+  const session = await client.realtime.connect({ model: "gpt-live-1" });
+  session.sendText("Reply with the single word ok.");
+  await session.waitTurn(60_000);
+  session.close();
+}
+const captionsId = pick(
+  (model) =>
+    model.id === "gemini-3.5-transcribe-live" ||
+    model.id === "gemini/gemini-3.5-transcribe-live",
+);
+if (captionsId) {
+  const captions = await client.realtime.connect({
+    provider: "gemini",
+    model: "gemini-3.5-transcribe-live",
+    mode: "native",
+    transcripts: true,
+  });
+  captions.sendAudioAppend(new Uint8Array(3200), "audio/pcm;rate=16000");
+  captions.sendAudioCommit(undefined, "audio/pcm;rate=16000");
+  await captions.recv(60_000);
+  captions.close();
 }
 
 client.lastLimits;

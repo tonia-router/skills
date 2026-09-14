@@ -22,7 +22,7 @@ Python package named `tonia` — install this SDK from
 
 ```python
 import os
-from tonia import AsyncTonia, EntitlementError, PolicyBlockError, RateLimitError, Tonia
+from tonia import AgentBlockError, AsyncTonia, EntitlementError, PolicyBlockError, RateLimitError, Tonia
 
 with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
     client.status.get()
@@ -77,12 +77,25 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
             messages=[{"role": "user", "content": "Bonjour"}],
         )
 
-    embedding = pick(lambda model: "embedding" in str(model["id"]))
+    embedding = pick(
+        lambda model: surface_of(model).get("family") == "embeddings"
+        or "embeddings" in caps(model)
+        or (
+            "embed" in str(model["id"]).lower()
+            and "rerank" not in str(model["id"]).lower()
+        )
+    )
     if embedding:
+        # Tenant /v1/embeddings — send model + input. Not /v2/embed.
         client.embeddings.create(model=embedding, input="Bonjour")
 
-    rerank = pick(lambda model: "rerank" in str(model["id"]))
+    rerank = pick(
+        lambda model: surface_of(model).get("family") == "rerank"
+        or "rerank" in caps(model)
+        or "rerank" in str(model["id"]).lower()
+    )
     if rerank:
+        # Tenant /v1/rerank — query + documents. Not a web search.
         client.rerank.create(model=rerank, query="q", documents=["a"])
 
     image_sku = pick(
@@ -98,11 +111,13 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
     if image_sku:
         # images.generate — 300s unless timeout= is set on Tonia(...)
         # Tenant dial (`1k`/`2k`/`4k`) or OpenAI size. Do not send resolution.
+        # Image 2 maps 2k to 1536x1024. Image 2.5 2k is 2048x2048.
         client.images.generate(
             model=image_sku,
             prompt="Draw a red fox",
             n=1,
             size="2k",
+            **({"quality": "auto"} if "gpt-image-2.5" in image_sku.lower() else {}),
         )
 
     gemini_image = pick(
@@ -167,6 +182,8 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
         )
     except PolicyBlockError:
         pass  # Bind a redact-mode profile in the portal, then retry.
+    except AgentBlockError:
+        pass  # Open Policies → profile → Advanced — Agent controls.
     except RateLimitError as err:
         if err.retryable:
             wait = err.retry_after_seconds or 1
@@ -179,6 +196,30 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
             raise
 
     client.last_limits
+
+    live = next(
+        (
+            model["id"]
+            for model in rows
+            if model["id"] in {"gpt-live-1", "openai/gpt-live-1"}
+            or "realtime" in caps(model)
+        ),
+        None,
+    )
+    if live:
+        with client.realtime.connect(model="gpt-live-1") as session:
+            session.send_text("Reply with the single word ok.")
+            session.wait_turn(timeout=60)
+        if any(model["id"] in {"gemini-3.5-transcribe-live", "gemini/gemini-3.5-transcribe-live"} for model in rows):
+            with client.realtime.connect(
+                provider="gemini",
+                model="gemini-3.5-transcribe-live",
+                mode="native",
+                transcripts=True,
+            ) as captions:
+                captions.send_audio_append(b"\x00\x00" * 1600, mime="audio/pcm;rate=16000")
+                captions.send_audio_commit(mime="audio/pcm;rate=16000")
+                captions.recv(timeout=60)
 
 async with AsyncTonia(api_key=os.environ["TONIA_API_KEY"]) as client:
     await client.models.list()

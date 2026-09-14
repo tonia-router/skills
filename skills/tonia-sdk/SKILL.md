@@ -4,8 +4,8 @@ description: >-
   Set up tonia from a portal API key through Cursor, Claude Code, Codex, or
   the official SDKs (@tonia-router/sdk, tonia). Use when creating a tonia_sk_ key,
   setting TONIA_API_KEY, pointing a coding tool at pass.tonia.ca, installing
-  the SDK, passing tools, streaming, or handling policy_block, RateLimitError,
-  Retry-After, or entitlement errors.
+  the SDK, passing tools, streaming, or handling policy_block, agent_block,
+  RateLimitError, Retry-After, or entitlement errors.
 ---
 
 # tonia-sdk
@@ -45,14 +45,15 @@ code. Stay on the public SDK surface.
 4. Call `client.models.list()` before picking a model — that list is what
    this key may call (bound profile, resolved live). Empty list → stop.
    Do not hardcode a SKU the list does not contain. Skip a helper when no
-   listed id matches that surface (chat, embeddings, `/v1/images`,
+   listed id matches that surface (chat, embeddings, rerank, `/v1/images`,
    `audio.speech`, `audio.transcriptions`, Gemini image, …). `models.list()` is Bearer /
    OpenAI-shaped (`anthropic/claude-…`).
    Anthropic clients listing with `x-api-key` see unprefixed ids (`claude-…`).
    Do not mix the two styles.
 5. Use `.stream()` for SSE. Do not buffer the stream. The SDK already raises
-   `PolicyBlockError` / `EntitlementError` on HTTP 200 carriers — catch the
-   typed class; do not re-parse `_tonia_policy_block` yourself.
+   `PolicyBlockError` / `EntitlementError` / `AgentBlockError` on HTTP 200
+   carriers — catch the typed class; do not re-parse `_tonia_policy_block`
+   or `_tonia_agent_block` yourself.
 6. Content redaction is configured in the [tonia portal](https://portal.tonia.ca)
    (Policies → Profiles), not via an SDK header.
 7. LLM function tools are an untyped passthrough body field (`tools`). The
@@ -71,3 +72,13 @@ code. Stay on the public SDK surface.
 - [Errors and DLP](errors-and-dlp.md)
 - SaaS integrator (your history, `usage`, limits) —
   [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `09-saas-integrator`
+- Embeddings (tenant `/v1/embeddings`) —
+  [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `11-embeddings`
+- Rerank (tenant `/v1/rerank`) —
+  [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `12-rerank`
+- Agent controls refusal (`AgentBlockError`) —
+  [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `13-agent-block`
+- Live / realtime (`wss /v1/realtime`, `gpt-live-1`) —
+  [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `14-realtime`
+- Live STT (`gemini-3.5-transcribe-live`, PCM 16 kHz) —
+  [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `16-gemini-transcribe-live`

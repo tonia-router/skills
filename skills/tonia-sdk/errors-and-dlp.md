@@ -23,8 +23,8 @@ uses a flat `{"error": "not_found"}` body.
 | `invalid_request_error` | `InvalidRequestError` | Bad body or wrong surface (see Gemini below) |
 | `client_error` | `PathNotAllowedError` | `client.request` path outside the allowlist |
 
-Catch `PolicyBlockError`, `RateLimitError`, and `EntitlementError` on
-runtime calls. Do not treat every 429 as admission.
+Catch `PolicyBlockError`, `AgentBlockError`, `RateLimitError`, and
+`EntitlementError` on runtime calls. Do not treat every 429 as admission.
 
 ### Admission 429 (`RateLimitError`)
 
@@ -77,19 +77,26 @@ Upstream or other audit 502/503 uses `type: api_error` (`ApiError`).
 ## Carriers on HTTP 200
 
 On chat-like routes, Pass may still return HTTP 200 with
-`_tonia_policy_block` or `_tonia_entitlement_block`. Official SDKs raise
-`PolicyBlockError` / `EntitlementError` before returning. Catch those
-classes — do not inspect the raw body for those keys yourself.
+`_tonia_policy_block`, `_tonia_entitlement_block`, or `_tonia_agent_block`.
+Official SDKs raise `PolicyBlockError` / `EntitlementError` /
+`AgentBlockError` before returning. Catch those classes — do not inspect
+the raw body for those keys yourself.
+
+`AgentBlockError` means the bound profile refused a tool, MCP, or hosted
+action (Policies → profile → Advanced — Agent controls). It is not a DLP
+hit. Cookbook: `13-agent-block`.
 
 ## Streaming blocks
 
-Pass decides policy/entitlement **before** the upstream stream. A blocked
-SSE response is HTTP 200 with `x-tonia-policy-block` or
-`x-tonia-entitlement-block`, plus a short synthetic body.
+Pass decides policy/entitlement/agent **before** the upstream stream. A
+blocked SSE response is HTTP 200 with `x-tonia-policy-block`,
+`x-tonia-entitlement-block`, or `x-tonia-agent-block` (plus
+`x-tonia-agent-capability` when present), plus a short synthetic body.
 
-The SDK raises `PolicyBlockError` / `EntitlementError` from those headers
-before yielding any SSE events. Body carriers remain a fallback
-(Anthropic nested `message_start.message`, or a later OpenAI chunk).
+The SDK raises `PolicyBlockError` / `EntitlementError` / `AgentBlockError`
+from those headers before yielding any SSE events. Body carriers remain a
+fallback (Anthropic nested `message_start.message`, or a later OpenAI
+chunk).
 
 ## Soft-limit headers
 
@@ -140,8 +147,9 @@ ask Pass to fetch private/internal URLs.
 ## Gemini image routing
 
 `client.images.generate` / `client.images.edit` call `/v1/images/*`
-for openai, xAI, and Meta. Alibaba is generate-only
-(`images.generate`). Gemini image SKUs must use
+for openai, xAI, and Meta. Path A example id is `gpt-image-2.5-flare`.
+`size: "2k"` is model-aware (Image 2 → `1536x1024`; 2.5 → `2048x2048`).
+Alibaba is generate-only (`images.generate`). Gemini image SKUs must use
 `client.interactions.create` (`POST /v1/interactions`).
 
 A Gemini SKU on `/v1/images/*` returns:

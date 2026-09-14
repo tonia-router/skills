@@ -92,3 +92,5 @@ await client.chat.completions.create({
 If the model returns `tool_calls`, execute them in **your** process, append
 the tool results, and call `create` again. See
 [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `08-tools-passthrough`.
+If the bound profile has Tool calls off, the SDK raises `AgentBlockError`
+(cookbook `13-agent-block`) — Policies → profile → Advanced — Agent controls.
