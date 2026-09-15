@@ -23,8 +23,8 @@ code. Stay on the public SDK surface.
    tools; they want a base URL + key only.
 3. **Write app code with the official SDK** — read
    [`compatibility.json`](compatibility.json) first. Detect the repo
-   language, then read [TypeScript](typescript.md) or [Python](python.md).
-   Rust is not shipped; see [Rust](rust.md).
+   language, then read [TypeScript](typescript.md), [Python](python.md),
+   or [Rust](rust.md) (`tonia-sdk` **0.4.0** git/tag; not on crates.io).
 4. **Errors, streaming, DLP, images** — [Errors and DLP](errors-and-dlp.md).
 5. Confirm signatures against the installed package and
    [`compatibility.json`](compatibility.json).
@@ -34,7 +34,8 @@ code. Stay on the public SDK surface.
 1. Detect the repository language and package manager before installing.
    If `compatibility.json` `status` is `unpublished`, install from the
    local SDK tree — do not `npm add` / `pip install` from the registry.
-   If `status` is `planned`, skip that package.
+   If `status` is `planned`, do not install from a registry. Rust
+   `tonia-sdk` is a local path-dep in this workspace — see [Rust](rust.md).
    Follow `runtimes` in that file: Python `>=3.11`, Node.js `>=22`. Do not
    target Python 3.10 or Node 18/20 (end-of-life).
 2. Default base URL: `https://pass.tonia.ca:8443`. Override only for an
@@ -68,7 +69,7 @@ code. Stay on the public SDK surface.
 - [Coding tools](tools.md)
 - [TypeScript](typescript.md) — `@tonia-router/sdk`
 - [Python](python.md) — `tonia`
-- [Rust](rust.md) — not shipped
+- [Rust](rust.md) — `tonia-sdk` **0.4.0** (git/tag; not on crates.io)
 - [Errors and DLP](errors-and-dlp.md)
 - SaaS integrator (your history, `usage`, limits) —
   [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `09-saas-integrator`

@@ -4,7 +4,8 @@
   "openapi_revision": "0.3.0",
   "runtimes": {
     "python": ">=3.11",
-    "node": ">=22"
+    "node": ">=22",
+    "rust": ">=1.85"
   },
   "packages": {
     "@tonia-router/sdk": {
@@ -18,8 +19,8 @@
       "tested": true
     },
     "tonia-sdk": {
-      "version": null,
-      "status": "planned",
+      "version": "0.4.0",
+      "status": "unpublished",
       "tested": false
     }
   }
