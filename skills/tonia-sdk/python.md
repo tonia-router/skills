@@ -60,11 +60,13 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
         messages=[{"role": "user", "content": "Bonjour"}],
     )
 
-    for event in client.chat.completions.stream(
+    stream = client.chat.completions.stream(
         model=ids[0],
         messages=[{"role": "user", "content": "Bonjour"}],
-    ):
+    )
+    for event in stream:
         pass  # event.json is a provider-shaped chunk when present
+        # Hang up: stream.close(), or break.
 
     client.responses.create(model=ids[0], input="Bonjour")
 
@@ -227,7 +229,8 @@ async with AsyncTonia(api_key=os.environ["TONIA_API_KEY"]) as client:
 
 Chat helpers default to a 60s timeout. Image / interactions helpers default
 to 300s unless you pass `timeout=` on `Tonia(...)`. Prefer `.stream()` over
-`create(stream=True)`.
+`create(stream=True)`. `stream.close()` / `await stream.aclose()` hangs up;
+`break` does the same.
 
 The SDK does not auto-retry. See [Errors and DLP](errors-and-dlp.md).
 LLM `tools` are a passthrough body field — [Coding tools](tools.md).

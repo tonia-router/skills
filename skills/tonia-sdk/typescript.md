@@ -63,12 +63,17 @@ await client.chat.completions.create({
   messages: [{ role: "user", content: "Bonjour" }],
 });
 
-for await (const event of client.chat.completions.stream({
-  model: ids[0],
-  messages: [{ role: "user", content: "Bonjour" }],
-})) {
+const ac = new AbortController();
+for await (const event of client.chat.completions.stream(
+  {
+    model: ids[0],
+    messages: [{ role: "user", content: "Bonjour" }],
+  },
+  { signal: ac.signal },
+)) {
   // event.json is a provider-shaped chunk when present
 }
+// Hang up: ac.abort(), or break the loop.
 
 await client.responses.create({ model: ids[0], input: "Bonjour" });
 
@@ -237,6 +242,7 @@ client.lastLimits;
 
 Use `.stream()` for SSE — do not pass `stream: true` to `create()` unless you
 want the overload that returns an async generator. Prefer `.stream()`.
+Pass `{ signal }` to hang up; `break` also cancels the body.
 
 The SDK does not auto-retry. See [Errors and DLP](errors-and-dlp.md).
 LLM `tools` are a passthrough body field — [Coding tools](tools.md).

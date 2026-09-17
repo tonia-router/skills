@@ -98,6 +98,20 @@ from those headers before yielding any SSE events. Body carriers remain a
 fallback (Anthropic nested `message_start.message`, or a later OpenAI
 chunk).
 
+## Stopping a stream
+
+Hang up the Pass socket. Do not buffer to EOF first.
+
+- TypeScript: pass `{ signal }` into `.stream()` / `.create(..., { signal })`,
+  then `AbortController.abort()`. `break` from `for await` also cancels
+  the body.
+- Python: `stream.close()` (sync) or `await stream.aclose()` (async).
+  `break` from the `for` / `async for` also closes.
+- Rust: `stream.abort()`, or drop the `SseStream`.
+
+Pass already signs the RESPONSE when the client disconnects. The SDK only
+closes the socket.
+
 ## Soft-limit headers
 
 Successful calls may include `x-tonia-limit-*` headers when usage is ≥ 80% of
