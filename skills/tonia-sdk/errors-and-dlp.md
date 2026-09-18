@@ -104,7 +104,7 @@ Hang up the Pass socket. Do not buffer to EOF first.
 
 - TypeScript: pass `{ signal }` into `.stream()` / `.create(..., { signal })`,
   then `AbortController.abort()`. `break` from `for await` also cancels
-  the body.
+  the body. Image, speech, and transcription helpers take the same `{ signal }`.
 - Python: `stream.close()` (sync) or `await stream.aclose()` (async).
   `break` from the `for` / `async for` also closes.
 - Rust: `stream.abort()`, or drop the `SseStream`.

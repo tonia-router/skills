@@ -109,6 +109,21 @@ if (rerank) {
   await client.rerank.create({ model: rerank, query: "q", documents: ["a"] });
 }
 
+const systemone = pick(
+  (model) =>
+    surfaceOf(model).family === "systemone" ||
+    caps(model).includes("systemone") ||
+    model.id.endsWith("jev-latest"),
+);
+if (systemone) {
+  // Tenant /v1/systemone — state + questions. No typed helper. No stream.
+  await client.request("POST", "/v1/systemone", {
+    model: systemone,
+    state: "The sky is blue.",
+    questions: { color: { type: "noul", instructions: "Is the sky blue?" } },
+  });
+}
+
 const imageSku = pick((model) => {
   if (/turbo/i.test(model.id)) return false;
   return (
@@ -119,7 +134,7 @@ const imageSku = pick((model) => {
   );
 });
 if (imageSku) {
-  // images.generate — 300s abort unless timeout is set on Tonia
+  // images.generate — 300s abort unless timeout is set; { signal } hangs up early
   // Tenant dial (`1k`/`2k`/`4k`) or OpenAI size. Do not send resolution.
   // Image 2 maps 2k to 1536x1024. Image 2.5 2k is 2048x2048.
   await client.images.generate({

@@ -100,6 +100,23 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
         # Tenant /v1/rerank — query + documents. Not a web search.
         client.rerank.create(model=rerank, query="q", documents=["a"])
 
+    systemone = pick(
+        lambda model: surface_of(model).get("family") == "systemone"
+        or "systemone" in caps(model)
+        or str(model["id"]).endswith("jev-latest")
+    )
+    if systemone:
+        # Tenant /v1/systemone — state + questions. No typed helper. No stream.
+        client.request(
+            "POST",
+            "/v1/systemone",
+            {
+                "model": systemone,
+                "state": "The sky is blue.",
+                "questions": {"color": {"type": "noul", "instructions": "Is the sky blue?"}},
+            },
+        )
+
     image_sku = pick(
         lambda model: "turbo" not in str(model["id"]).lower()
         and (

@@ -24,7 +24,7 @@ code. Stay on the public SDK surface.
 3. **Write app code with the official SDK** — read
    [`compatibility.json`](compatibility.json) first. Detect the repo
    language, then read [TypeScript](typescript.md), [Python](python.md),
-   or [Rust](rust.md) (`tonia-sdk` **0.4.2** git/tag, not crates.io).
+   or [Rust](rust.md) (`tonia-sdk` **0.4.4** git/tag, not crates.io).
 4. **Errors, streaming, DLP, images** — [Errors and DLP](errors-and-dlp.md).
 5. Confirm signatures against the installed package and
    [`compatibility.json`](compatibility.json).
@@ -72,7 +72,7 @@ code. Stay on the public SDK surface.
 - [Coding tools](tools.md)
 - [TypeScript](typescript.md) — `@tonia-router/sdk`
 - [Python](python.md) — `tonia`
-- [Rust](rust.md) — `tonia-sdk` **0.4.2** (git/tag, not crates.io)
+- [Rust](rust.md) — `tonia-sdk` **0.4.4** (git/tag, not crates.io)
 - [Errors and DLP](errors-and-dlp.md)
 - SaaS integrator (your history, `usage`, limits) —
   [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `09-saas-integrator`
@@ -80,6 +80,8 @@ code. Stay on the public SDK surface.
   [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `11-embeddings`
 - Rerank (tenant `/v1/rerank`) —
   [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `12-rerank`
+- System One (tenant `/v1/systemone`) —
+  [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `17-systemone`. Escape hatch only — no typed `systemone.create`. Point the TypeSafe SDK at the tonia origin (`TYPESAFE_BASE_URL`); `models.list()` through tonia is unsupported.
 - Agent controls refusal (`AgentBlockError`) —
   [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `13-agent-block`
 - Live / realtime (`wss /v1/realtime`, `gpt-live-1`) —

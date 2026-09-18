@@ -5,12 +5,12 @@ Need a key first? [Portal key setup](setup.md). Pointing Cursor at tonia?
 
 Read [`compatibility.json`](compatibility.json) before installing.
 
-The crate is **`tonia-sdk` 0.4.2** (`tonia-sdk-rs/0.4.2`) on
-`github.com/tonia-router/rust-sdk` `main` (tag `v0.4.2`). It is **not** on
+The crate is **`tonia-sdk` 0.4.4** (`tonia-sdk-rs/0.4.4`) on
+`github.com/tonia-router/rust-sdk` `main` (tag `v0.4.4`). It is **not** on
 crates.io. Do not `cargo add tonia-sdk` from the registry.
 
 ```toml
-tonia-sdk = { git = "https://github.com/tonia-router/rust-sdk", tag = "v0.4.2" }
+tonia-sdk = { git = "https://github.com/tonia-router/rust-sdk", tag = "v0.4.4" }
 # local Tonia tree:
 # tonia-sdk = { path = "../tonia-router/rust-sdk" }
 ```
@@ -102,6 +102,20 @@ async fn main() -> Result<(), tonia_sdk::ToniaError> {
     client
         .rerank
         .create(json!({ "model": "rerank", "query": "q", "documents": ["a"] }))
+        .await
+        .ok();
+    // Tenant /v1/systemone — state + questions. No typed helper. No stream.
+    client
+        .request(
+            "POST",
+            "/v1/systemone",
+            Some(json!({
+                "model": "typesafe/jev-latest",
+                "state": "The sky is blue.",
+                "questions": { "color": { "type": "noul", "instructions": "Is the sky blue?" } },
+            })),
+            tonia_sdk::RequestOptions::default(),
+        )
         .await
         .ok();
 
@@ -211,6 +225,7 @@ The same `.stream()` helper exists on `messages`, `responses`, and
 `interactions` (300s). Public `Tonia::stream` is the TS-shaped SSE escape
 hatch (`request()` stays JSON-only). Live also has `send_audio_append` /
 `send_audio_commit` / `send_delegation_result` / `recv` (cookbook 15–16).
+System One is cookbook **17** (`request("POST", "/v1/systemone", …)`).
 `request()` cannot multipart and cannot hit `/v1/realtime`. STT `data:` URIs
 raise `TranscriptionError::InvalidFile` (`InvalidTranscriptionFile`, not a
 `ToniaError` kind) before the network. Speech returns raw `Bytes` when

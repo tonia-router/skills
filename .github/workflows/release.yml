@@ -23,7 +23,7 @@ jobs:
 
               gh skill install tonia-router/skills tonia-sdk
 
-          Aligns with \`@tonia-router/sdk\` / \`tonia\` 0.3.1 (stream cancel) and
-          \`tonia-sdk\` 0.4.2. Apache 2.0, copyright 2026 tonia inc.
+          Aligns with \`@tonia-router/sdk\` / \`tonia\` / \`tonia-sdk\` 0.4.4.
+          Apache 2.0, copyright 2026 tonia inc.
           EOF
           gh release create "$TAG" --title "$TAG" --notes-file /tmp/notes.md
