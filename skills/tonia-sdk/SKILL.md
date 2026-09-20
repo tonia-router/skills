@@ -81,7 +81,7 @@ code. Stay on the public SDK surface.
 - Rerank (tenant `/v1/rerank`) —
   [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `12-rerank`
 - System One (tenant `/v1/systemone`) —
-  [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `17-systemone`. Escape hatch only — no typed `systemone.create`. Point the TypeSafe SDK at the tonia origin (`TYPESAFE_BASE_URL`); `models.list()` through tonia is unsupported.
+  [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `17-systemone`. Escape hatch only — no typed `systemone.create`. Point the TypeSafe SDK at the tonia origin (`TYPESAFE_BASE_URL`); `models.list()` through tonia is unsupported. Answers are TypeSafe primitives: a **noul** is `noul` only (probability that the answer is yes; no `confidence`). Choice and Score return `confidence` derived from `probabilities` — the answer tells you what; confidence tells you whether to act. Schema: website `#systemone` and `SystemOneRequest` / `SystemOneResponse` in the public OpenAPI.
 - Agent controls refusal (`AgentBlockError`) —
   [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `13-agent-block`
 - Live / realtime (`wss /v1/realtime`, `gpt-live-1`) —
