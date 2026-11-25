@@ -226,9 +226,10 @@ with Tonia(api_key=os.environ["TONIA_API_KEY"]) as client:
         None,
     )
     if live:
+        # Native PCM16 LE 24 kHz in, output_audio.delta out. No text turns.
         with client.realtime.connect(model="gpt-live-1") as session:
-            session.send_text("Reply with the single word ok.")
-            session.wait_turn(timeout=60)
+            session.send_audio_append(b"\x00\x00" * 2400, mime="audio/pcm")
+            session.recv(timeout=60)
         if any(model["id"] in {"gemini-3.5-transcribe-live", "gemini/gemini-3.5-transcribe-live"} for model in rows):
             with client.realtime.connect(
                 provider="gemini",

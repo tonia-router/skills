@@ -85,6 +85,6 @@ code. Stay on the public SDK surface.
 - Agent controls refusal (`AgentBlockError`) —
   [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `13-agent-block`
 - Live / realtime (`wss /v1/realtime`, `gpt-live-1`) —
-  [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `14-realtime`
+  [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `15-live-native`
 - Live STT (`gemini-3.5-transcribe-live`, PCM 16 kHz) —
   [`sdk-examples`](https://github.com/tonia-router/sdk-examples) `16-gemini-transcribe-live`

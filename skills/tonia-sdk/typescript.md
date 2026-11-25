@@ -229,9 +229,10 @@ const live = pick(
     caps(model).includes("realtime"),
 );
 if (live) {
+  // Native PCM16 LE 24 kHz in, output_audio.delta out. No text turns.
   const session = await client.realtime.connect({ model: "gpt-live-1" });
-  session.sendText("Reply with the single word ok.");
-  await session.waitTurn(60_000);
+  session.sendAudioAppend(new Uint8Array(4800), "audio/pcm");
+  await session.recv(60_000);
   session.close();
 }
 const captionsId = pick(

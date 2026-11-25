@@ -201,8 +201,11 @@ async fn main() -> Result<(), tonia_sdk::ToniaError> {
                 ..RealtimeConnect::default()
             })
             .await?;
-        session.send_text("Reply with the single word ok.").await?;
-        session.wait_turn(Duration::from_secs(60)).await?;
+        // Native PCM16 LE 24 kHz in, output_audio.delta out. No text turns.
+        session
+            .send_audio_append(&[0u8; 4800], Some("audio/pcm"))
+            .await?;
+        session.recv(Some(Duration::from_secs(60))).await?;
         session.close().await?;
     }
 
