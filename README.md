@@ -32,7 +32,7 @@ skills/
         ├── tools.md          Cursor / Claude Code / Codex + LLM tools
         ├── typescript.md     @tonia-router/sdk
         ├── python.md         tonia
-        ├── rust.md           tonia-sdk 0.4.4, not crates.io
+        ├── rust.md           tonia-sdk 0.4.5, not crates.io
         ├── errors-and-dlp.md typed errors, streaming, DLP
         └── compatibility.json
 ```

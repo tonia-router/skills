@@ -5,12 +5,12 @@ Need a key first? [Portal key setup](setup.md). Pointing Cursor at tonia?
 
 Read [`compatibility.json`](compatibility.json) before installing.
 
-The crate is **`tonia-sdk` 0.4.4** (`tonia-sdk-rs/0.4.4`) on
-`github.com/tonia-router/rust-sdk` `main` (tag `v0.4.4`). It is **not** on
+The crate is **`tonia-sdk` 0.4.5** (`tonia-sdk-rs/0.4.5`) on
+`github.com/tonia-router/rust-sdk` `main` (tag `v0.4.5`). It is **not** on
 crates.io. Do not `cargo add tonia-sdk` from the registry.
 
 ```toml
-tonia-sdk = { git = "https://github.com/tonia-router/rust-sdk", tag = "v0.4.4" }
+tonia-sdk = { git = "https://github.com/tonia-router/rust-sdk", tag = "v0.4.5" }
 # local Tonia tree:
 # tonia-sdk = { path = "../tonia-router/rust-sdk" }
 ```
